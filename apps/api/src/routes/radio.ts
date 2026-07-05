@@ -61,6 +61,27 @@ async function searchYoutubeArtwork(query: string): Promise<string> {
   return '';
 }
 
+async function searchAppleMusicArtwork(title: string, artist: string): Promise<string> {
+  try {
+    const query = `${artist} - ${title}`;
+    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      const data = await res.json() as any;
+      const results = data?.results;
+      if (Array.isArray(results) && results.length > 0) {
+        const rawUrl = results[0].artworkUrl100 || results[0].artworkUrl60;
+        if (rawUrl) {
+          return rawUrl.replace(/\/\d+x\d+bb\.jpg$/, '/600x600bb.jpg');
+        }
+      }
+    }
+  } catch (err: any) {
+    console.warn(`[Apple Music Artwork] Failed for "${artist} - ${title}":`, err.message || err);
+  }
+  return '';
+}
+
 async function resolveTrackArtwork(title: string, artist: string): Promise<string> {
   const cacheKey = `artwork:resolve:${normalizeString(title)}:${normalizeString(artist)}`;
   try {
@@ -81,7 +102,18 @@ async function resolveTrackArtwork(title: string, artist: string): Promise<strin
     console.warn(`[Artwork Resolve] Spotify failed for "${searchQuery}":`, err);
   }
 
-  // 2. Try Deezer (fallback)
+  // 2. Try Apple Music
+  try {
+    const appleArtwork = await searchAppleMusicArtwork(title, artist);
+    if (appleArtwork) {
+      await redis.set(cacheKey, appleArtwork, { ex: 604800 }); // 7 days TTL
+      return appleArtwork;
+    }
+  } catch (err) {
+    console.warn(`[Artwork Resolve] Apple Music failed for "${searchQuery}":`, err);
+  }
+
+  // 3. Try Deezer (fallback)
   try {
     const deezerResult = await searchDeezerTrack(searchQuery);
     if (deezerResult && deezerResult.artworkUrl) {
@@ -92,7 +124,7 @@ async function resolveTrackArtwork(title: string, artist: string): Promise<strin
     console.warn(`[Artwork Resolve] Deezer failed for "${searchQuery}":`, err);
   }
 
-  // 3. Try YouTube (fallback)
+  // 4. Try YouTube (fallback)
   try {
     const ytArtwork = await searchYoutubeArtwork(searchQuery);
     if (ytArtwork) {

@@ -126,7 +126,7 @@ export default function PlayingPage() {
       )}
 
       {/* Back Button */}
-      <BackButton onClick={handleBack} label="Now Playing" />
+      <BackButton onClick={handleBack} />
 
       {/* Main Content Area */}
       <div className='relative z-10 w-full flex-1 flex flex-col items-center justify-center'>

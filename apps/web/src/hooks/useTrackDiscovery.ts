@@ -58,7 +58,7 @@ export function useTrackDiscovery() {
                 found.encoded,
                 found.info.identifier,
                 found.info.length,
-                found.info.artworkUrl || undefined
+                currentTrack.artworkUrl || found.info.artworkUrl || undefined
               );
               success = true;
             }
