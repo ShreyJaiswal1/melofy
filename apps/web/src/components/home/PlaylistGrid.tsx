@@ -140,86 +140,108 @@ export function PlaylistGrid({
       <div
         className={
           isCarousel
-            ? 'flex overflow-x-auto gap-6 pb-4 custom-scrollbar carousel-scrollbar snap-x snap-mandatory scroll-smooth'
-            : 'grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-6'
+            ? 'flex overflow-x-auto gap-2 pb-4 custom-scrollbar carousel-scrollbar snap-x snap-mandatory scroll-smooth'
+            : 'grid grid-cols-[repeat(auto-fill,minmax(145px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(165px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(175px,1fr))] gap-2'
         }
       >
-        {items.map((item, index) => (
-          <motion.div
-            key={item.id + index}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.05 }}
-            className={`flex flex-col gap-3 group cursor-pointer ${
-              isCarousel
-                ? 'min-w-[140px] w-[140px] sm:min-w-[160px] sm:w-[160px] md:min-w-[180px] md:w-[180px] snap-start shrink-0'
-                : ''
-            }`}
-            onClick={() => router.push(`/playlist/${item.id}`)}
-          >
-            <div className='aspect-square rounded-[2rem] bg-muted relative overflow-hidden shadow-xl group-hover:shadow-primary/10 transition-all duration-500'>
-              <div className='absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-10'>
-                <Button
-                  size='icon'
-                  className='h-14 w-14 rounded-full bg-primary text-primary-foreground hover:scale-110 transition-all shadow-2xl'
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    void handlePlayItem(item, index);
-                  }}
-                >
-                  <Play className='h-7 w-7 fill-current transition-colors ml-1' />
-                </Button>
-                {onImport && (
+        {items.map((item, index) => {
+          const isAlbumType = item.type === 'album' || item.id.startsWith('deezer:album:');
+          const isArtistType = item.type === 'artist' || item.id.startsWith('deezer:artist:');
+          
+          let cardHref = `/playlist/${item.id}`;
+          if (isAlbumType) {
+            cardHref = `/album/${item.id.replace('deezer:album:', '')}`;
+          } else if (isArtistType) {
+            cardHref = `/artist/${item.id.replace('deezer:artist:', '')}`;
+          }
+
+          return (
+            <motion.div
+              key={item.id + index}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.05 }}
+              whileTap={{ scale: 0.98 }}
+              className={cn(
+                'flex flex-col gap-3.5 p-2.5 rounded-[1.75rem] bg-transparent hover:bg-white/[0.03] border border-transparent hover:border-white/5 transition-all duration-300 group cursor-pointer shadow-lg',
+                isCarousel && 'min-w-[145px] w-[145px] sm:min-w-[165px] sm:w-[165px] md:min-w-[175px] md:w-[175px] snap-start shrink-0'
+              )}
+              onClick={() => router.push(cardHref)}
+            >
+              <div className='aspect-square rounded-2xl bg-muted relative overflow-hidden shadow-md group-hover:shadow-primary/10 transition-all duration-500 border border-white/5'>
+                <div className='absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-10'>
                   <Button
                     size='icon'
-                    variant='outline'
-                    className='h-14 w-14 rounded-full border-white/10 bg-white/5 hover:bg-white/10 text-white hover:scale-110 transition-all shadow-2xl'
+                    className='h-11 w-11 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground active:scale-95 transition-all shadow-xl'
                     onClick={(event) => {
                       event.stopPropagation();
-                      onImport(item);
+                      void handlePlayItem(item, index);
                     }}
                   >
-                    <Plus className='h-7 w-7' />
+                    <Play className='h-5 w-5 fill-current transition-colors ml-0.5' />
                   </Button>
-                )}
-              </div>
+                  {onImport && (
+                    <Button
+                      size='icon'
+                      variant='outline'
+                      className='h-11 w-11 rounded-full border-white/10 bg-white/5 hover:bg-white/10 text-white active:scale-95 transition-all shadow-xl'
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onImport(item);
+                      }}
+                    >
+                      <Plus className='h-5 w-5' />
+                    </Button>
+                  )}
+                </div>
 
-              <div className='h-full w-full bg-linear-to-br from-muted to-background transition-transform duration-700 flex items-center justify-center'>
-                {item.images?.[0]?.url ? (
-                  <img
-                    src={item.images[0].url}
-                    alt={item.name}
-                    className='h-full w-full object-cover'
-                  />
-                ) : (
-                  <Disc className='h-12 w-12 text-muted-foreground/40' />
-                )}
-              </div>
+                <div className='h-full w-full bg-linear-to-br from-muted to-background transition-transform duration-700 flex items-center justify-center'>
+                  {item.images?.[0]?.url ? (
+                    <img
+                      src={item.images[0].url}
+                      alt={item.name}
+                      className='h-full w-full object-cover group-hover:scale-105 transition-transform duration-500'
+                    />
+                  ) : (
+                    <Disc className='h-12 w-12 text-muted-foreground/40' />
+                  )}
+                </div>
 
-              <div className='absolute bottom-4 right-4 bg-background/60 backdrop-blur-md px-3 py-1 rounded-full border border-border z-20'>
-                <p className='text-[10px] text-foreground font-bold uppercase'>
-                  {item.tracks?.total
-                    ? `${item.tracks.total} Tracks`
-                    : isAlbum
-                      ? 'Album'
-                      : 'Mix'}
+                <div className='absolute bottom-3 right-3 bg-background/60 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/5 z-20'>
+                  <p className='text-[9px] text-foreground font-bold uppercase tracking-wider'>
+                    {isArtistType
+                      ? 'Artist'
+                      : isAlbumType
+                        ? 'Album'
+                        : item.tracks?.total
+                          ? `${item.tracks.total} Tracks`
+                          : 'Playlist'}
+                  </p>
+                </div>
+              </div>
+              <div className='flex flex-col px-1'>
+                <p className='text-foreground font-bold truncate text-sm group-hover:text-primary transition-colors tracking-wide'>
+                  {item.name}
+                </p>
+                <p className='text-muted-foreground text-[10px] truncate uppercase tracking-wider mt-1 font-semibold font-outfit'>
+                  {isAlbumType
+                    ? 'Saved Album'
+                    : isArtistType
+                      ? 'Saved Artist'
+                      : item.type === 'custom'
+                        ? 'Melofy Playlist'
+                        : item.type === 'spotify'
+                          ? 'Spotify Import'
+                          : item.type === 'youtube'
+                            ? 'YouTube Playlist'
+                            : item.owner?.display_name ||
+                              item.description ||
+                              'Playlist'}
                 </p>
               </div>
-            </div>
-            <div className='flex flex-col px-1 mt-2'>
-              <p className='text-foreground font-bold truncate text-base group-hover:text-primary transition-colors'>
-                {item.name}
-              </p>
-              <p className='text-muted-foreground text-xs truncate uppercase tracking-tighter mt-1 font-medium font-outfit'>
-                {isAlbum
-                  ? item.artists?.[0]?.name
-                  : item.owner?.display_name ||
-                    item.description ||
-                    'Spotify Mix'}
-              </p>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          )
+        })}
       </div>
     </section>
   );

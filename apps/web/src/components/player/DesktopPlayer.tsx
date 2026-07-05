@@ -191,7 +191,7 @@ export function DesktopPlayer({
                 <p 
                   onClick={(e) => {
                     e.stopPropagation();
-                    router.push(`/search?q=${encodeURIComponent(currentTrack.artist)}`);
+                    router.push(`/artist/${encodeURIComponent(currentTrack.artist)}`);
                   }}
                   className='text-xs text-muted-foreground truncate hover:text-primary hover:underline underline-offset-2 cursor-pointer transition-all font-outfit'
                 >

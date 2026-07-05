@@ -48,6 +48,7 @@ interface GitHubRelease {
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
+  const router = useRouter();
   const {
     essence,
     setEssence,
@@ -59,7 +60,6 @@ export default function SettingsPage() {
     setCustomAccent,
   } = useTheme();
   const { autoPip, toggleAutoPip } = useSettingsStore();
-  const router = useRouter();
   
   const [showDiscordGuide, setShowDiscordGuide] = useState(false);
   const [isNative, setIsNative] = useState(false);

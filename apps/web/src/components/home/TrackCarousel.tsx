@@ -3,7 +3,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Music2 } from 'lucide-react';
+import { Play, Music2, Pause } from 'lucide-react';
 import { Track, usePlayerStore } from '@/store/usePlayerStore';
 import { resolvePlayableTrack, TrackItem } from '@/components/ui/TrackList';
 import { TrackOptionsMenu } from '@/components/ui/TrackOptionsMenu';
@@ -148,7 +148,7 @@ export function TrackCarousel({
           </Button>
         )}
       </div>
-      <div className='flex overflow-x-auto gap-6 pb-6 custom-scrollbar carousel-scrollbar scroll-smooth snap-x snap-mandatory'>
+      <div className='flex overflow-x-auto gap-2 pb-6 custom-scrollbar carousel-scrollbar scroll-smooth snap-x snap-mandatory'>
         {tracks.map((track, index) => {
           const trackItem = trackItems.at(index);
           const titleText = trackItem?.title || 'Unknown Title';
@@ -162,29 +162,17 @@ export function TrackCarousel({
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05 }}
-              className='flex flex-col gap-3 group cursor-pointer snap-start min-w-[140px] w-[140px] sm:min-w-[160px] sm:w-[160px] md:min-w-[180px] md:w-[180px] shrink-0'
+              whileTap={{ scale: 0.98 }}
+              className='flex flex-col gap-3.5 p-2.5 rounded-[1.75rem] bg-transparent hover:bg-white/[0.03] border border-transparent hover:border-white/5 transition-all duration-300 group cursor-pointer snap-start min-w-[145px] w-[145px] sm:min-w-[165px] sm:w-[165px] md:min-w-[175px] md:w-[175px] shrink-0 shadow-lg'
               onClick={() => void handlePlay(index)}
             >
-              <div className='aspect-square rounded-[2.5rem] bg-muted relative overflow-hidden shadow-lg group-hover:shadow-primary/20 transition-all duration-500'>
+              <div className='aspect-square rounded-2xl bg-muted relative overflow-hidden shadow-md group-hover:shadow-primary/10 transition-all duration-500 border border-white/5'>
                 <div className={cn('absolute bottom-3 right-3 z-20 transition-opacity duration-300', !isActive && 'opacity-0 group-hover:opacity-100')}>
-                  <div className='w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-xl group-hover:scale-105 transition-transform'>
+                  <div className='w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-xl group-hover:scale-105 transition-transform'>
                     {isActive ? (
-                      <div className='flex items-center justify-center gap-0.5 h-4'>
-                        <div
-                          className='w-0.5 h-2 bg-primary-foreground animate-bounce'
-                          style={{ animationDelay: '0ms' }}
-                        />
-                        <div
-                          className='w-0.5 h-3 bg-primary-foreground animate-bounce'
-                          style={{ animationDelay: '100ms' }}
-                        />
-                        <div
-                          className='w-0.5 h-2 bg-primary-foreground animate-bounce'
-                          style={{ animationDelay: '200ms' }}
-                        />
-                      </div>
+                      <Pause className='h-4 w-4 fill-current' />
                     ) : (
-                      <Play className='h-5 w-5 fill-primary-foreground translate-x-0.5' />
+                      <Play className='h-4 w-4 fill-current ml-0.5' />
                     )}
                   </div>
                 </div>
@@ -194,19 +182,19 @@ export function TrackCarousel({
                     <img
                       src={artworkUrl}
                       alt={titleText}
-                      className='w-full h-full object-cover'
+                      className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-500'
                     />
                   ) : (
                     <Music2 className='h-12 w-12 text-muted-foreground/40' />
                   )}
                 </div>
               </div>
-              <div className='flex items-start justify-between px-2 gap-2'>
+              <div className='flex items-start justify-between px-1 gap-2'>
                 <div className='flex flex-col min-w-0'>
-                  <p className='text-foreground font-bold truncate text-base group-hover:text-primary transition-colors'>
+                  <p className='text-foreground font-bold truncate text-sm group-hover:text-primary transition-colors tracking-wide'>
                     {titleText}
                   </p>
-                  <p className='text-muted-foreground text-xs truncate uppercase tracking-tighter mt-1 font-medium font-outfit'>
+                  <p className='text-muted-foreground text-[10px] truncate uppercase tracking-wider mt-1 font-semibold font-outfit'>
                     {artistText}
                   </p>
                 </div>

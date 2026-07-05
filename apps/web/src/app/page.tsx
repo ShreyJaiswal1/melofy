@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useAuth } from '@/lib/firebase/auth-context';
 import { motion } from 'framer-motion';
-import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LandingPage } from '@/components/layout/LandingPage';
 import { TrackCarousel } from '@/components/home/TrackCarousel';
@@ -19,6 +19,7 @@ import {
 } from '@/lib/track-mappers';
 import { useHomeStore } from '@/store/useHomeStore';
 import { useLibraryStore } from '@/store/useLibraryStore';
+import { useRegion } from '@/hooks/useRegion';
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -33,6 +34,7 @@ export default function Home() {
     editorsPicks,
     discoveryMixes,
     featuredPlaylists,
+    regionalChart,
     hasFetched,
     setTrending,
     setNewReleases,
@@ -41,9 +43,11 @@ export default function Home() {
     setEditorsPicks,
     setDiscoveryMixes,
     setFeaturedPlaylists,
+    setRegionalChart,
     setHasFetched,
   } = useHomeStore();
   const [isFetching, setIsFetching] = useState(!hasFetched);
+  const { country } = useRegion();
 
   const { handlePlayCollection, handleImportSpotifyPlaylist } = useSpotifyCollection();
   const recentPlaylists = useLibraryStore((state) => state.recentPlaylists) || [];
@@ -97,6 +101,37 @@ export default function Home() {
   const handlePlayNewReleases = useCallback(() => {
     playPlaylist(newReleasesTracksToPlay);
   }, [playPlaylist, newReleasesTracksToPlay]);
+
+  const regionalTracks = useMemo(() => {
+    if (!regionalChart?.tracks?.data) return [];
+    return regionalChart.tracks.data;
+  }, [regionalChart]);
+
+  const regionalTracksToPlay = useMemo(() => {
+    return regionalTracks.map((track) => ({
+      id: `deezer:${track.id}`,
+      title: track.title,
+      artist: track.artist.name,
+      artworkUrl: track.album.cover_medium || track.artist.picture_medium || '',
+      duration: track.duration * 1000,
+      url: '',
+    } as Track));
+  }, [regionalTracks]);
+
+  const handlePlayRegional = useCallback(() => {
+    playPlaylist(regionalTracksToPlay);
+  }, [playPlaylist, regionalTracksToPlay]);
+
+  const COUNTRY_NAMES: Record<string, string> = {
+    IN: 'India',
+    US: 'United States',
+    GB: 'United Kingdom',
+    FR: 'France',
+    DE: 'Germany',
+    BR: 'Brazil',
+  };
+
+  const countryName = COUNTRY_NAMES[country.toUpperCase()] || country;
 
   // Autoplay carousel scroll
   const isHoveredRef = useRef(false);
@@ -152,12 +187,13 @@ export default function Home() {
 
         const fetchOptions = { headers: authHeaders, signal: controller.signal };
 
-        const [trendRes, newRes, mixRes, editorsPicksRes, featuredRes] = await Promise.all([
+        const [trendRes, newRes, mixRes, editorsPicksRes, featuredRes, regionalRes] = await Promise.all([
           fetch('/api/spotify/trending', fetchOptions),
           fetch('/api/spotify/new-releases', fetchOptions),
           fetch('/api/spotify/mixes', fetchOptions),
           fetch('/api/spotify/editors-picks', fetchOptions),
           fetch('/api/spotify/featured-playlists', fetchOptions),
+          fetch(`/api/deezer/chart?country=${country}`, fetchOptions),
         ]);
 
         if (trendRes.ok) setTrending(await trendRes.json());
@@ -165,6 +201,7 @@ export default function Home() {
         if (mixRes.ok) setMixes(await mixRes.json());
         if (editorsPicksRes.ok) setEditorsPicks(await editorsPicksRes.json());
         if (featuredRes.ok) setFeaturedPlaylists(await featuredRes.json());
+        if (regionalRes.ok) setRegionalChart(await regionalRes.json());
 
         // Fetch Discovery Mixes based on current history (via ref, not deps)
         const currentHistory = historyRef.current;
@@ -209,7 +246,7 @@ export default function Home() {
       // Abort in-flight requests when the component unmounts or user changes
       controller.abort();
     };
-  }, [user, hasFetched, setTrending, setNewReleases, setMixes, setEditorsPicks, setDiscoveryMixes, setRecommendations, setFeaturedPlaylists, setHasFetched]);
+  }, [user, hasFetched, country, setTrending, setNewReleases, setMixes, setEditorsPicks, setDiscoveryMixes, setRecommendations, setFeaturedPlaylists, setRegionalChart, setHasFetched]);
 
   if (loading) return <div className='min-h-screen bg-background' />;
 
@@ -320,6 +357,15 @@ export default function Home() {
                 }))}
                 isCarousel={true}
                 onPlayPlaylist={handlePlayCollection}
+                className='mt-0'
+              />
+            )}
+
+            {regionalTracksToPlay.length > 0 && (
+              <TrackCarousel
+                title={`Trending in ${countryName}`}
+                tracks={regionalTracksToPlay}
+                onPlayAll={handlePlayRegional}
                 className='mt-0'
               />
             )}

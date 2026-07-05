@@ -48,4 +48,53 @@ router.post('/player-state', requireFirebaseAuth, async (req, res) => {
   }
 });
 
+// GET /api/player/track/:id - Fetch track info by YouTube ID (or general search)
+router.get('/player/track/:id', async (req, res) => {
+  const id = req.params.id;
+  const cacheKey = `track:yt:${id}`;
+
+  try {
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return res.json(typeof cached === 'string' ? JSON.parse(cached) : cached);
+    }
+  } catch {}
+
+  try {
+    const { lavalink } = await import('../index');
+    const node = lavalink.nodeManager.leastUsedNodes()[0];
+    if (!node || !node.connected) {
+      return res.status(500).json({ error: 'Audio node link not available' });
+    }
+
+    // Try finding the track directly by its YouTube URL or ID
+    const searchResult = await node.search(
+      { query: id.startsWith('http') ? id : `https://www.youtube.com/watch?v=${id}` },
+      { id: req.user?.uid || 'MelofyInternal' }
+    );
+
+    if (searchResult.loadType === 'empty' || searchResult.loadType === 'error' || !searchResult.tracks || searchResult.tracks.length === 0) {
+      // Try raw search as fallback
+      const fallbackResult = await node.search(
+        { query: id },
+        { id: req.user?.uid || 'MelofyInternal' }
+      );
+      if (fallbackResult.loadType === 'empty' || fallbackResult.loadType === 'error' || !fallbackResult.tracks || fallbackResult.tracks.length === 0) {
+        return res.status(404).json({ error: 'Track not found' });
+      }
+      
+      const track = fallbackResult.tracks[0];
+      await redis.set(cacheKey, JSON.stringify(track), { ex: 86400 * 7 }); // Cache for 7 days
+      return res.json(track);
+    }
+
+    const track = searchResult.tracks[0];
+    await redis.set(cacheKey, JSON.stringify(track), { ex: 86400 * 7 }); // Cache for 7 days
+    return res.json(track);
+  } catch (error) {
+    console.error('[TrackResolver] Failed to resolve track:', error);
+    res.status(500).json({ error: 'Failed to resolve track' });
+  }
+});
+
 export default router;

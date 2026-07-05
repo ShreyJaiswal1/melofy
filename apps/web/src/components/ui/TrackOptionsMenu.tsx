@@ -1,11 +1,12 @@
 'use client';
 import { useState } from 'react';
 
-import { MoreHorizontal, Heart, ListPlus, HeartOff } from 'lucide-react';
+import { MoreHorizontal, Heart, ListPlus, HeartOff, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { useLikedSongs } from '@/hooks/useLikedSongs';
 import { Track as PlayerTrack } from '@/store/usePlayerStore';
+import { toast } from 'sonner';
 
 export function TrackOptionsMenu({
   track,
@@ -56,6 +57,29 @@ export function TrackOptionsMenu({
         >
           {liked ? <HeartOff className='h-4 w-4 text-primary' /> : <Heart className='h-4 w-4 text-muted-foreground' />}
           {liked ? 'Remove from liked' : 'Save to liked'}
+        </button>
+        <button
+          className='w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted rounded-xl transition-colors'
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            setOpen(false);
+            
+            const trackId = track.identifier || track.id;
+            const shareUrl = `${window.location.origin}/track/${trackId}`;
+            
+            navigator.clipboard.writeText(shareUrl)
+              .then(() => {
+                toast.success('Track link copied to clipboard!');
+              })
+              .catch((err) => {
+                console.error('Failed to copy link:', err);
+                toast.error('Failed to copy link');
+              });
+          }}
+        >
+          <Share2 className='h-4 w-4 text-muted-foreground' />
+          Share Track
         </button>
       </PopoverContent>
     </Popover>

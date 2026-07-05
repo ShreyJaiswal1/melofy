@@ -25,6 +25,7 @@ import { usePlayerStore, Track } from '@/store/usePlayerStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { SyncedLyrics } from '@/components/ui/SyncedLyrics';
+import { useRouter } from 'next/navigation';
 import { ListenAlongDrawer } from './ListenAlongDrawer';
 import { Drawer } from 'vaul';
 
@@ -69,6 +70,7 @@ export function MobilePlayer({
   toggleRepeat,
   isBuffering,
 }: MobilePlayerProps) {
+  const router = useRouter();
   const [showLyrics, setShowLyrics] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
   const { isLiked, toggleLike } = useLikedSongs();
@@ -247,7 +249,13 @@ export function MobilePlayer({
               <h2 className='text-3xl font-black text-white truncate drop-shadow-lg tracking-tight w-full text-left'>
                 {currentTrack.title}
               </h2>
-              <p className='text-xl text-white/60 truncate mt-1 font-medium font-outfit w-full text-left'>
+              <p
+                onClick={() => {
+                  setIsExpanded(false);
+                  router.push(`/artist/${encodeURIComponent(currentTrack.artist)}`);
+                }}
+                className='text-xl text-white/60 truncate mt-1 font-medium font-outfit w-full text-left hover:text-primary hover:underline underline-offset-2 cursor-pointer transition-colors'
+              >
                 {currentTrack.artist}
               </p>
             </motion.div>

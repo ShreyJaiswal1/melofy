@@ -92,3 +92,20 @@ export async function fetchFullSpotifyPlaylist(playlistId: string) {
     }
   };
 }
+
+export async function searchSpotifyTrack(query: string) {
+  try {
+    const data = await spotifyGet(`/search?q=${encodeURIComponent(query)}&type=track&limit=1`);
+    const track = data?.tracks?.items?.[0];
+    if (!track) return null;
+    return {
+      title: track.name,
+      artist: track.artists?.[0]?.name || '',
+      artworkUrl: track.album?.images?.[1]?.url || track.album?.images?.[0]?.url || '',
+      duration: track.duration_ms
+    };
+  } catch (error: any) {
+    console.error(`[Spotify Search] Failed for query "${query}":`, error.message || error);
+    return null;
+  }
+}

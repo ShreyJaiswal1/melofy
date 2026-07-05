@@ -4,6 +4,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useAuth } from '@/lib/firebase/auth-context';
 import { Capacitor } from '@capacitor/core';
 import { useLibraryStore, type SavedCollection } from '@/store/useLibraryStore';
+import { logTrackPlay } from '@/lib/firebase/playLogger';
 
 interface PersistedPlayerState {
   currentTrack?: Track | null;
@@ -205,6 +206,18 @@ export function usePlayerSync(
       if (stateSyncTimer.current) clearTimeout(stateSyncTimer.current);
     };
   }, [syncStateToServer, user?.uid, isHydrated]);
+
+  // Debounced Play History Logger (Task 6)
+  useEffect(() => {
+    if (!user?.uid || !currentTrack) return;
+
+    // Log the play event after the user has listened for 2 seconds (enables immediate radio filtration)
+    const logTimer = setTimeout(() => {
+      void logTrackPlay(user.uid, currentTrack);
+    }, 2000);
+
+    return () => clearTimeout(logTimer);
+  }, [currentTrack?.id, user?.uid]);
 
   return { isHydrated, syncStateToServer };
 }

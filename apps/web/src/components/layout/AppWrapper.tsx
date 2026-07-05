@@ -335,6 +335,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
   const isPublicRoute =
     pathname === '/' ||
     pathname === '/login' ||
+    pathname.startsWith('/track/') ||
     isStandaloneRoute;
 
   // Whether the current route is one of the always-mounted mobile tab pages
@@ -445,7 +446,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
           <div
             className={cn(
               'flex flex-col flex-1',
-              pathname === '/playing' ? 'pb-0' : 'pb-6 md:pb-10',
+              (pathname === '/playing' || pathname.startsWith('/track/')) ? 'pb-0' : 'pb-6 md:pb-10',
             )}
           >
             {/* ─── MOBILE-ONLY: Always-mounted tab panels ─────────────────────────── */}

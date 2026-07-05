@@ -40,6 +40,23 @@ import {
   onSnapshot,
 } from 'firebase/firestore';
 
+function SidebarPlaylistImage({ src, alt }: { src: string; alt: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError || !src) {
+    return <ListMusic className='h-4 w-4 text-muted-foreground group-hover/playlist:text-primary transition-colors' />;
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      onError={() => setHasError(true)}
+      className='h-full w-full object-cover group-hover/playlist:scale-110 transition-transform duration-200'
+    />
+  );
+}
+
 export function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
@@ -244,14 +261,18 @@ export function Sidebar() {
         )}>
           <div className='mt-2 flex flex-col gap-1.5 w-full'>
             {allPlaylists.map((playlist) => {
-              const isLocalReference = savedPlaylistIds.has(
-                playlist.id as string,
-              );
+              const playlistIdStr = playlist.id || '';
+              const isLocalReference = savedPlaylistIds.has(playlistIdStr);
+
+              const isAlbum = playlistIdStr.startsWith('deezer:album:');
+              const playlistHref = isAlbum
+                ? `/album/${playlistIdStr.replace('deezer:album:', '')}`
+                : `/playlist/${playlistIdStr}`;
 
               return (
                 <ContextMenu key={playlist.id}>
                   <ContextMenuTrigger className='w-full'>
-                    <Link href={`/playlist/${playlist.id}`} className='w-full'>
+                    <Link href={playlistHref} className='w-full'>
                       <div
                         className={cn(
                           'flex items-center rounded-md text-sm transition-[padding,gap,colors] duration-300 ease-in-out group/playlist cursor-pointer w-full h-10 px-3',
@@ -271,7 +292,7 @@ export function Sidebar() {
                           ('coverUrl' in playlist &&
                             typeof playlist.coverUrl === 'string' &&
                             playlist.coverUrl) ? (
-                            <Image
+                            <SidebarPlaylistImage
                               src={
                                 (playlist.artworkUrl ||
                                 ('coverUrl' in playlist
@@ -279,9 +300,6 @@ export function Sidebar() {
                                   : undefined)) as string
                               }
                               alt={playlist.name}
-                              width={32}
-                              height={32}
-                              className='h-full w-full object-cover group-hover/playlist:scale-110 transition-transform duration-200'
                             />
                           ) : (
                             <ListMusic className='h-4 w-4 text-muted-foreground group-hover/playlist:text-primary transition-colors' />

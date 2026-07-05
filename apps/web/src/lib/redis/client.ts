@@ -1,7 +1,7 @@
 import { Redis } from '@upstash/redis';
 
-// Initialize Redis only if the URL and Token are provided in env vars
-export const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL || '',
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || '',
-});
+const url = process.env.UPSTASH_REDIS_REST_URL;
+const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+// Initialize Redis only if both configuration variables are present
+export const redis = url && token ? new Redis({ url, token }) : null;

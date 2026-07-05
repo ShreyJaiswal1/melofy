@@ -51,6 +51,22 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'img.youtube.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'lastfm.freetls.fastly.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'e-cdns-images.dzcdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.dzcdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.mzstatic.com',
+      },
     ],
   },
   async rewrites() {
@@ -90,6 +106,14 @@ const nextConfig: NextConfig = {
       {
         source: '/api/player/:path*',
         destination: `${backendBaseUrl}/api/player/:path*`,
+      },
+      {
+        source: '/api/deezer/:path*',
+        destination: `${backendBaseUrl}/api/deezer/:path*`,
+      },
+      {
+        source: '/api/radio/:path*',
+        destination: `${backendBaseUrl}/api/radio/:path*`,
       },
       {
         source: '/api/jam/:path*',

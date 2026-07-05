@@ -23,6 +23,7 @@ import { SyncedLyrics } from '@/components/ui/SyncedLyrics';
 import { useLikedSongs } from '@/hooks/useLikedSongs';
 import { useLyricsPanelStore } from '@/store/useLyricsPanelStore';
 import { Drawer } from 'vaul';
+import { BackButton } from '@/components/ui/BackButton';
 
 export default function PlayingPage() {
   const currentTrack = usePlayerStore((state) => state.currentTrack);
@@ -76,14 +77,15 @@ export default function PlayingPage() {
   const handleShare = () => {
     if (!currentTrack) return;
 
-    const youtubeUrl = currentTrack.identifier
-      ? `https://www.youtube.com/watch?v=${currentTrack.identifier}`
-      : `https://www.youtube.com/results?search_query=${encodeURIComponent(`${currentTrack.title} ${currentTrack.artist}`)}`;
+    const trackId = currentTrack.identifier || currentTrack.id;
+    const shareUrl = trackId
+      ? `${window.location.origin}/track/${trackId}`
+      : `${window.location.origin}/search?q=${encodeURIComponent(`${currentTrack.title} ${currentTrack.artist}`)}`;
 
     navigator.clipboard
-      .writeText(youtubeUrl)
+      .writeText(shareUrl)
       .then(() => {
-        toast.success('Link copied to clipboard!');
+        toast.success('Melofy share link copied to clipboard!');
       })
       .catch((err) => {
         console.error('Failed to copy: ', err);
@@ -123,17 +125,8 @@ export default function PlayingPage() {
         </div>
       )}
 
-      {/* Top Navigation Bar */}
-      <div className='relative z-1 w-full flex justify-between items-center'>
-        <Button
-          variant='ghost'
-          onClick={handleBack}
-          className='text-foreground/60 hover:text-foreground hover:bg-foreground/10 rounded-full'
-        >
-          <ChevronLeft className='mr-2 h-5 w-5' />
-          Back
-        </Button>
-      </div>
+      {/* Back Button */}
+      <BackButton onClick={handleBack} label="Now Playing" />
 
       {/* Main Content Area */}
       <div className='relative z-10 w-full flex-1 flex flex-col items-center justify-center'>

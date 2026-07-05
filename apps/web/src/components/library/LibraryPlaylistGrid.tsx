@@ -60,74 +60,84 @@ export function LibraryPlaylistGrid({
       ) : (
         <motion.div
           layout
-          className='grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-6'
+          className='grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2'
         >
           <AnimatePresence>
-            {playlists.map((playlist) => (
-              <motion.div
-                key={playlist.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className='group relative flex flex-col gap-3'
-              >
-                <div className='aspect-square rounded-[2rem] bg-muted relative overflow-hidden shadow-xl group-hover:shadow-primary/10 transition-all duration-500'>
-                  <div className='absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10'>
-                    <Link href={`/playlist/${playlist.id}`}>
-                      <Button
-                        size='icon'
-                        className='h-14 w-14 rounded-full bg-primary text-primary-foreground hover:scale-110 transition-all shadow-2xl'
-                      >
-                        <Play className='h-7 w-7 fill-current transition-colors ml-1' />
-                      </Button>
-                    </Link>
-                  </div>
-                  <Link href={`/playlist/${playlist.id}`}>
-                    <div className='h-full w-full bg-linear-to-br from-muted to-background group-hover:scale-110 transition-transform duration-700 cursor-pointer'>
-                      {playlist.isLikedSongs || playlist.name === 'Liked Songs' ? (
-                        <div className='h-full w-full flex items-center justify-center bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500'>
-                          <Heart className='h-16 w-16 text-white fill-white drop-shadow-lg' />
-                        </div>
-                      ) : playlist.artworkUrl ? (
-                        <Image
-                          src={playlist.artworkUrl}
-                          alt={playlist.name}
-                          width={300}
-                          height={300}
-                          className='h-full w-full object-cover'
-                        />
-                      ) : (
-                        <div className='h-full w-full flex items-center justify-center'>
-                          <Music2 className='h-12 w-12 text-muted-foreground' />
-                        </div>
-                      )}
+            {playlists.map((playlist) => {
+              const playlistIdStr = playlist.id || '';
+              const isAlbum = playlistIdStr.startsWith('deezer:album:');
+              const itemHref = isAlbum
+                ? `/album/${playlistIdStr.replace('deezer:album:', '')}`
+                : `/playlist/${playlistIdStr}`;
+
+              return (
+                <motion.div
+                  key={playlistIdStr}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  whileTap={{ scale: 0.98 }}
+                  className='flex flex-col gap-3.5 p-2.5 rounded-[1.75rem] bg-transparent hover:bg-white/[0.03] border border-transparent hover:border-white/5 transition-all duration-300 group cursor-pointer shadow-lg relative'
+                >
+                  <div className='aspect-square rounded-2xl bg-muted relative overflow-hidden shadow-md group-hover:shadow-primary/10 transition-all duration-500 border border-white/5'>
+                    <div className='absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10'>
+                      <Link href={itemHref}>
+                        <Button
+                          size='icon'
+                          className='h-11 w-11 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground active:scale-95 transition-all shadow-xl'
+                        >
+                          <Play className='h-5 w-5 fill-current transition-colors ml-0.5' />
+                        </Button>
+                      </Link>
                     </div>
-                  </Link>
-                  <div className='absolute bottom-4 right-4 bg-background/60 backdrop-blur-md px-3 py-1 rounded-full border border-border z-20'>
-                    <p className='text-[10px] text-foreground font-bold tracking-wider'>
-                      {playlist.trackCount} TRACKS
-                    </p>
-                  </div>
-                </div>
-                <div className='flex items-start justify-between px-1'>
-                  <Link
-                    href={`/playlist/${playlist.id}`}
-                    className='flex-1 truncate'
-                  >
-                    <div className='cursor-pointer group/text'>
-                      <h3 className='text-foreground font-bold truncate text-sm group-hover/text:underline transition-all'>
-                        {playlist.name}
-                      </h3>
-                      <p className='text-muted-foreground text-[10px] uppercase tracking-widest font-medium'>
-                        {playlist.isLikedSongs || playlist.name === 'Liked Songs'
-                          ? 'System Playlist'
-                          : 'type' in playlist 
-                          ? 'Melofy Playlist' 
-                          : 'Spotify Import'}
+                    <Link href={itemHref}>
+                      <div className='h-full w-full bg-linear-to-br from-muted to-background transition-transform duration-700 cursor-pointer'>
+                        {playlist.isLikedSongs || playlist.name === 'Liked Songs' ? (
+                          <div className='h-full w-full flex items-center justify-center bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 group-hover:scale-105 transition-transform duration-500'>
+                            <Heart className='h-12 w-12 text-white fill-white drop-shadow-lg' />
+                          </div>
+                        ) : playlist.artworkUrl ? (
+                          <Image
+                            src={playlist.artworkUrl}
+                            alt={playlist.name}
+                            width={300}
+                            height={300}
+                            className='h-full w-full object-cover group-hover:scale-105 transition-transform duration-500'
+                          />
+                        ) : (
+                          <div className='h-full w-full flex items-center justify-center group-hover:scale-105 transition-transform duration-500'>
+                            <Music2 className='h-10 w-10 text-muted-foreground' />
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+                    <div className='absolute bottom-3 right-3 bg-background/60 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/5 z-20'>
+                      <p className='text-[9px] text-foreground font-bold tracking-wider'>
+                        {playlist.trackCount} TRACKS
                       </p>
                     </div>
-                  </Link>
+                  </div>
+                  <div className='flex items-start justify-between px-1 gap-2'>
+                    <Link
+                      href={itemHref}
+                      className='flex-1 truncate'
+                    >
+                      <div className='cursor-pointer group/text'>
+                        <h3 className='text-foreground font-bold truncate text-sm group-hover/text:underline transition-all'>
+                          {playlist.name}
+                        </h3>
+                        <p className='text-muted-foreground text-[10px] uppercase tracking-widest font-medium'>
+                          {playlist.isLikedSongs || playlist.name === 'Liked Songs'
+                            ? 'System Playlist'
+                            : isAlbum
+                            ? 'Saved Album'
+                            : 'type' in playlist 
+                            ? 'Melofy Playlist' 
+                            : 'Spotify Import'}
+                        </p>
+                      </div>
+                    </Link>
 
                   <div className='relative'>
                     {!playlist.isLikedSongs && (
@@ -196,9 +206,10 @@ export function LibraryPlaylistGrid({
                   </div>
                 </div>
               </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </motion.div>
       )}
     </div>
   );

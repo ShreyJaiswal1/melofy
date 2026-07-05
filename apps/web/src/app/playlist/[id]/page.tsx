@@ -10,6 +10,7 @@ import { usePlayerStore } from '@/store/usePlayerStore';
 import { useLibraryStore } from '@/store/useLibraryStore';
 import { Button } from '@/components/ui/button';
 import { TrackList, TrackItem } from '@/components/ui/TrackList';
+import { BackButton } from '@/components/ui/BackButton';
 import Link from 'next/link';
 import {
   mapSpotifyTrackToTrackItem,
@@ -295,6 +296,8 @@ export default function PlaylistPage() {
 
   return (
     <div className='flex flex-col min-h-full overflow-x-hidden custom-scrollbar p-4 md:p-8 pb-8 md:pb-8 relative'>
+      {/* Back Button */}
+      <BackButton label={isSpotifySource ? 'Spotify Playlist' : isYoutubeSource ? 'YouTube Playlist' : 'Playlist'} />
       {isLikedSongs ? (
         <div
           className='absolute top-0 left-0 right-0 h-[50vh] opacity-25 blur-[120px] pointer-events-none z-10 bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500'
@@ -309,87 +312,80 @@ export default function PlaylistPage() {
           }}
         />
       ) : null}
-      <header className='flex flex-col md:flex-row items-center md:items-end gap-6 mb-8 mt-4'>
-        <div className='h-48 w-48 md:h-60 md:w-60 rounded-[2.5rem] bg-muted shadow-2xl shrink-0 overflow-hidden z-10 relative'>
-          {(playlist as CustomPlaylistData).isLikedSongs || playlist.name === 'Liked Songs' ? (
-            <div className='h-full w-full flex items-center justify-center bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500'>
-              <Heart className='h-24 w-24 text-white fill-white drop-shadow-lg' />
-            </div>
-          ) : playlist.artworkUrl ? (
-            <Image
-              src={playlist.artworkUrl}
-              alt={playlist.name}
-              width={300}
-              height={300}
-              className='h-full w-full object-cover'
-            />
-          ) : (
-            <div className='h-full w-full flex items-center justify-center'>
-              <Music2 className='h-24 w-24 text-muted-foreground' />
-            </div>
-          )}
-        </div>
+      <header className='flex flex-col md:flex-row items-center md:items-center justify-between gap-6 mb-8 mt-12 md:mt-16 w-full z-10'>
+        <div className='flex flex-col md:flex-row items-center md:items-center gap-6 text-center md:text-left w-full md:w-auto'>
+          <div className='h-48 w-48 md:h-60 md:w-60 rounded-[2rem] bg-muted shadow-2xl shrink-0 overflow-hidden relative border border-white/5'>
+            {(playlist as CustomPlaylistData).isLikedSongs || playlist.name === 'Liked Songs' ? (
+              <div className='h-full w-full flex items-center justify-center bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500'>
+                <Heart className='h-24 w-24 text-white fill-white drop-shadow-lg' />
+              </div>
+            ) : playlist.artworkUrl ? (
+              <Image
+                src={playlist.artworkUrl}
+                alt={playlist.name}
+                width={300}
+                height={300}
+                className='h-full w-full object-cover'
+              />
+            ) : (
+              <div className='h-full w-full flex items-center justify-center'>
+                <Music2 className='h-24 w-24 text-muted-foreground' />
+              </div>
+            )}
+          </div>
 
-        <div className='flex flex-col gap-2'>
-          <p className='text-primary font-bold tracking-widest text-[10px] uppercase'>
-            {isSpotifySource ? 'Spotify Playlist' : isYoutubeSource ? 'YouTube Playlist' : 'Playlist'}
-          </p>
-          <h1 className='text-5xl md:text-7xl font-bold text-foreground tracking-tighter mb-2 line-clamp-2'>
-            {playlist.name}
-          </h1>
-          {playlist.description && (
-            <p className='text-muted-foreground text-sm font-medium line-clamp-2 max-w-2xl'>
-              {playlist.description.replace(/<[^>]*>?/gm, '')}
-            </p>
-          )}
-          <div className='flex items-center flex-wrap gap-1.5 text-muted-foreground text-sm font-light mt-2'>
-            <span className='font-semibold text-foreground'>
-              {isSpotifySource ? 'Spotify' : isYoutubeSource ? 'YouTube' : user?.displayName || 'User'}
-            </span>
-            <span>&middot;</span>
-            <span>
-              {trackItems.length} {trackItems.length === 1 ? 'song' : 'songs'}
-              {formattedDuration && `, ${formattedDuration}`}
-            </span>
+          <div className='flex flex-col gap-2'>
+            <h1 className='text-5xl md:text-7xl font-bold text-foreground tracking-tighter mb-2 line-clamp-2'>
+              {playlist.name}
+            </h1>
+            {playlist.description && (
+              <p className='text-muted-foreground text-sm font-medium line-clamp-2 max-w-md mx-auto md:mx-0'>
+                {playlist.description.replace(/<[^>]*>?/gm, '')}
+              </p>
+            )}
+            <div className='flex items-center flex-wrap justify-center md:justify-start gap-1.5 text-muted-foreground text-sm font-light mt-2'>
+              <span className='font-semibold text-foreground'>
+                {isSpotifySource ? 'Spotify' : isYoutubeSource ? 'YouTube' : user?.displayName || 'User'}
+              </span>
+              <span>&middot;</span>
+              <span>
+                {trackItems.length} {trackItems.length === 1 ? 'song' : 'songs'}
+                {formattedDuration && `, ${formattedDuration}`}
+              </span>
+            </div>
           </div>
         </div>
-      </header>
 
-      <div className='flex items-center gap-6 mb-8'>
-
-        <Button
-          size='lg'
-          className='bg-primary text-primary-foreground font-bold h-14 w-14 rounded-full shadow-lg hover:scale-105 transition-transform'
-          onClick={handlePlayPlaylist}
-        >
-          <Play className='h-6 w-6 fill-current' />
-        </Button>
-        {isSpotifySource ? (
+        <div className='flex items-center gap-3 shrink-0 self-center md:self-end'>
           <Button
-            variant='outline'
-            size='icon'
-            className={`h-12 w-12 rounded-full border-2 transition-all ${
-              saved
-                ? 'border-primary text-primary hover:bg-primary/10'
-                : 'border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground'
-            }`}
-            onClick={handleToggleSave}
-            title={saved ? 'Remove from Library' : 'Save to Library'}
+            size='lg'
+            onClick={handlePlayPlaylist}
+            className="h-16 px-8 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold shadow-lg active:scale-[0.98] transition-all flex items-center gap-3 cursor-pointer"
           >
-            {saved ? (
-              <Check className='h-6 w-6' strokeWidth={3} />
-            ) : (
-              <Heart className='h-6 w-6' />
-            )}
+            <Play className="h-6 w-6 fill-current" />
+            <span>Play</span>
           </Button>
-        ) : (
-          <p className='text-muted-foreground font-light italic tracking-widest text-[10px] uppercase'>
-            Play whole playlist
-          </p>
-        )}
-
-
-      </div>
+          {isSpotifySource && (
+            <Button
+              variant='outline'
+              size='icon'
+              className={`h-16 w-16 rounded-full border-2 transition-all flex items-center justify-center shrink-0 ${
+                saved
+                  ? 'border-primary text-primary hover:bg-primary/10'
+                  : 'border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground'
+              }`}
+              onClick={handleToggleSave}
+              title={saved ? 'Remove from Library' : 'Save to Library'}
+            >
+              {saved ? (
+                <Check className='h-6 w-6' strokeWidth={3} />
+              ) : (
+                <Heart className='h-6 w-6' />
+              )}
+            </Button>
+          )}
+        </div>
+      </header>
 
       <TrackList tracks={trackItems} />
     </div>
@@ -399,38 +395,40 @@ export default function PlaylistPage() {
 function PlaylistPageSkeleton() {
   return (
     <div className='flex flex-col min-h-full overflow-x-hidden p-4 md:p-8 pb-8 md:pb-8 relative animate-pulse'>
-      {/* Header Skeleton */}
-      <header className='flex flex-col md:flex-row items-center md:items-end gap-6 mb-8 mt-4'>
-        {/* Cover Art Skeleton */}
-        <div className='h-48 w-48 md:h-60 md:w-60 rounded-[2.5rem] bg-zinc-200 dark:bg-zinc-800/60 shadow-2xl shrink-0' />
+      {/* Back Button */}
+      <BackButton label="Playlist" />
 
-        {/* Metadata Details Skeleton */}
-        <div className='flex flex-col gap-2 w-full md:w-auto md:min-w-[300px]'>
-          {/* Subtitle / tag */}
-          <div className='h-3.5 w-24 bg-zinc-200 dark:bg-zinc-800/60 rounded' />
-          
-          {/* Title */}
-          <div className='h-12 md:h-16 w-3/4 md:w-[450px] bg-zinc-200 dark:bg-zinc-800/60 rounded-2xl my-2' />
-          
-          {/* Description */}
-          <div className='h-4 w-5/6 md:w-[350px] bg-zinc-200 dark:bg-zinc-800/60 rounded' />
-          
-          {/* Bottom stats row */}
-          <div className='flex items-center gap-1.5 mt-2'>
-            <div className='h-4 w-16 bg-zinc-200 dark:bg-zinc-800/60 rounded' />
-            <span className='text-zinc-300 dark:text-zinc-700'>&middot;</span>
-            <div className='h-4 w-28 bg-zinc-200 dark:bg-zinc-800/60 rounded' />
+      {/* Header Skeleton */}
+      <header className='flex flex-col md:flex-row items-center md:items-center justify-between gap-6 mb-8 mt-12 md:mt-16 w-full z-10'>
+        <div className='flex flex-col md:flex-row items-center md:items-center gap-6 text-center md:text-left w-full md:w-auto'>
+          {/* Cover Art Skeleton */}
+          <div className='h-48 w-48 md:h-60 md:w-60 rounded-[2rem] bg-zinc-200 dark:bg-zinc-800/60 shadow-2xl shrink-0' />
+
+          {/* Metadata Details Skeleton */}
+          <div className='flex flex-col gap-2 w-full md:w-auto md:min-w-[300px]'>
+            {/* Title */}
+            <div className='h-12 md:h-16 w-3/4 md:w-[450px] bg-zinc-200 dark:bg-zinc-800/60 rounded-2xl my-2 mx-auto md:mx-0' />
+            
+            {/* Description */}
+            <div className='h-4 w-5/6 md:w-[350px] bg-zinc-200 dark:bg-zinc-800/60 rounded mx-auto md:mx-0' />
+            
+            {/* Bottom stats row */}
+            <div className='flex items-center justify-center md:justify-start gap-1.5 mt-2'>
+              <div className='h-4 w-16 bg-zinc-200 dark:bg-zinc-800/60 rounded' />
+              <span className='text-zinc-300 dark:text-zinc-700'>&middot;</span>
+              <div className='h-4 w-28 bg-zinc-200 dark:bg-zinc-800/60 rounded' />
+            </div>
           </div>
         </div>
-      </header>
 
-      {/* Action Bar Skeleton */}
-      <div className='flex items-center gap-6 mb-8'>
-        {/* Play Button Skeleton */}
-        <div className='h-14 w-14 rounded-full bg-zinc-200 dark:bg-zinc-800/60 shadow-lg' />
-        {/* Heart/Like Button Skeleton */}
-        <div className='h-12 w-12 rounded-full bg-zinc-200 dark:bg-zinc-800/60' />
-      </div>
+        {/* Action Bar Skeleton */}
+        <div className='flex items-center gap-3 shrink-0 self-center md:self-end'>
+          {/* Play Button Skeleton */}
+          <div className='h-16 w-24 rounded-full bg-zinc-200 dark:bg-zinc-800/60 shadow-lg' />
+          {/* Heart Button Skeleton */}
+          <div className='h-16 w-16 rounded-full bg-zinc-200 dark:bg-zinc-800/60' />
+        </div>
+      </header>
 
       {/* Track List Skeleton */}
       <div className='flex flex-col gap-1'>

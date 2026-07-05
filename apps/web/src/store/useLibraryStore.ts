@@ -5,7 +5,7 @@ export interface SavedCollection {
   id: string; // Spotify ID or Custom UUID
   name: string;
   artworkUrl: string;
-  type: 'custom' | 'spotify' | 'youtube';
+  type: 'custom' | 'spotify' | 'youtube' | 'artist' | 'album';
   trackCount?: number;
   tracks?: unknown[]; // Only for custom playlists
   isLikedSongs?: boolean;

@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { TrendingUp, Loader2, Music2, Play } from 'lucide-react';
 import { TrackList, TrackItem } from '@/components/ui/TrackList';
+import { BackButton } from '@/components/ui/BackButton';
 import { usePlayerStore } from '@/store/usePlayerStore';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/firebase/auth-context';
@@ -65,42 +66,49 @@ export default function TrendingPage() {
   }, [user]);
 
   return (
-    <div className='flex flex-col min-h-full overflow-x-hidden custom-scrollbar p-4 md:p-8 pb-8 md:pb-8'>
-      <header className='flex flex-col md:flex-row items-center md:items-end gap-6 mb-8 mt-4'>
-        <div className='h-48 w-48 md:h-60 md:w-60 rounded-[2.5rem] bg-linear-to-br from-primary/30 to-blue-500/20 shadow-2xl shrink-0 flex items-center justify-center'>
-          <TrendingUp className='h-24 w-24 text-primary' />
-        </div>
+    <div className='flex flex-col min-h-full overflow-x-hidden custom-scrollbar p-4 md:p-8 pb-8 md:pb-8 relative'>
+      {/* Back Button */}
+      <BackButton label="Trending" />
 
-        <div className='flex flex-col gap-2'>
-          <p className='text-primary font-bold tracking-widest text-[10px] uppercase'>
-            Chart
-          </p>
-          <h1 className='text-5xl md:text-7xl font-bold text-foreground tracking-tighter mb-2'>
-            Top 50 Global
-          </h1>
-          <div className='flex items-center gap-2 text-muted-foreground text-sm font-light'>
-            <span className='font-semibold text-foreground'>Spotify</span>
-            <span>&middot;</span>
-            <span>{tracks.length} tracks</span>
-            <span>&middot;</span>
-            <span>Updated daily</span>
+      {/* Ambient background blur */}
+      <div
+        className='absolute top-0 left-0 right-0 h-[50vh] opacity-20 blur-[120px] pointer-events-none z-10 bg-linear-to-br from-primary/30 to-blue-500/25'
+      />
+
+      <header className='flex flex-col md:flex-row items-center md:items-center justify-between gap-6 mb-8 mt-12 md:mt-16 w-full z-10'>
+        <div className='flex flex-col md:flex-row items-center md:items-center gap-6 text-center md:text-left w-full md:w-auto'>
+          <div className='h-48 w-48 md:h-60 md:w-60 rounded-[2rem] bg-linear-to-br from-primary/30 to-blue-500/20 shadow-2xl shrink-0 flex items-center justify-center border border-white/5'>
+            <TrendingUp className='h-24 w-24 text-primary' />
+          </div>
+
+          <div className='flex flex-col gap-2'>
+            <h1 className='text-5xl md:text-7xl font-bold text-foreground tracking-tighter mb-2'>
+              Top 50 Global
+            </h1>
+            <div className='flex items-center flex-wrap justify-center md:justify-start gap-1.5 text-muted-foreground text-sm font-light mt-2'>
+              <span className='font-semibold text-foreground'>Spotify</span>
+              <span>&middot;</span>
+              <span>
+                {tracks.length} {tracks.length === 1 ? 'track' : 'tracks'}
+              </span>
+              <span>&middot;</span>
+              <span>Updated daily</span>
+            </div>
           </div>
         </div>
-      </header>
 
-      <div className='flex items-center gap-6 mb-8'>
-        <Button
-          size='lg'
-          className='bg-primary text-primary-foreground font-bold h-14 w-14 rounded-full shadow-lg hover:scale-105 transition-transform'
-          onClick={() => playPlaylist(tracksToPlay)}
-          disabled={tracksToPlay.length === 0}
-        >
-          <Play className='h-6 w-6 fill-current' />
-        </Button>
-        <p className='text-muted-foreground text-sm font-light italic'>
-          Play the weekly top charts
-        </p>
-      </div>
+        <div className='flex items-center gap-3 shrink-0 self-center md:self-end'>
+          <Button
+            size='lg'
+            onClick={() => playPlaylist(tracksToPlay)}
+            disabled={tracksToPlay.length === 0}
+            className="h-16 px-8 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold shadow-lg active:scale-[0.98] transition-all flex items-center gap-3 cursor-pointer"
+          >
+            <Play className="h-6 w-6 fill-current" />
+            <span>Play</span>
+          </Button>
+        </div>
+      </header>
 
       {isLoading ? (
         <div className='flex flex-col items-center justify-center py-32 gap-4'>

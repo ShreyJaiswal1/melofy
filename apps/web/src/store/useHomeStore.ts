@@ -20,6 +20,28 @@ export interface SpotifyCollectionSummary {
   type?: string;
 }
 
+export interface DeezerTrack {
+  id: number;
+  title: string;
+  duration: number;
+  artist: {
+    id: number;
+    name: string;
+    picture_medium?: string;
+  };
+  album: {
+    id: number;
+    title: string;
+    cover_medium?: string;
+  };
+}
+
+export interface DeezerChart {
+  tracks?: {
+    data: DeezerTrack[];
+  };
+}
+
 interface HomeStore {
   trending: SpotifyTrendingItem[];
   newReleases: SpotifyCollectionSummary[];
@@ -28,6 +50,7 @@ interface HomeStore {
   editorsPicks: SpotifyCollectionSummary[];
   discoveryMixes: SpotifyCollectionSummary[];
   featuredPlaylists: SpotifyCollectionSummary[];
+  regionalChart: DeezerChart | null;
   hasFetched: boolean;
 
   setTrending: (data: SpotifyTrendingItem[]) => void;
@@ -37,6 +60,7 @@ interface HomeStore {
   setEditorsPicks: (data: SpotifyCollectionSummary[]) => void;
   setDiscoveryMixes: (data: SpotifyCollectionSummary[]) => void;
   setFeaturedPlaylists: (data: SpotifyCollectionSummary[]) => void;
+  setRegionalChart: (data: DeezerChart | null) => void;
   setHasFetched: (status: boolean) => void;
 }
 
@@ -48,6 +72,7 @@ export const useHomeStore = create<HomeStore>((set) => ({
   editorsPicks: [],
   discoveryMixes: [],
   featuredPlaylists: [],
+  regionalChart: null,
   hasFetched: false,
 
   setTrending: (data) => set({ trending: data }),
@@ -57,5 +82,6 @@ export const useHomeStore = create<HomeStore>((set) => ({
   setEditorsPicks: (data) => set({ editorsPicks: data }),
   setDiscoveryMixes: (data) => set({ discoveryMixes: data }),
   setFeaturedPlaylists: (data) => set({ featuredPlaylists: data }),
+  setRegionalChart: (data) => set({ regionalChart: data }),
   setHasFetched: (status) => set({ hasFetched: status }),
 }));

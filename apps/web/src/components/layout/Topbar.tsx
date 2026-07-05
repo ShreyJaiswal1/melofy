@@ -95,13 +95,12 @@ export function Topbar() {
     artworkUrl: track.info?.artworkUrl || '',
     duration: track.info?.duration || track.info?.length || 0,
     album: track.info?.author || '',
-    encoded: track.encoded,
+    url: track.encoded,
   });
 
   const handleTrackClick = (track: LavalinkTrack) => {
     const mappedTrack = mapTrack(track);
-    const allMappedTracks = results.map((t) => mapTrack(t));
-    playInContext(mappedTrack, allMappedTracks, true);
+    playTrack(mappedTrack, true);
     setIsFocused(false);
     setQuery('');
     if (inputRef.current) inputRef.current.blur();

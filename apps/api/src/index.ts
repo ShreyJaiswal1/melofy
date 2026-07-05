@@ -12,6 +12,8 @@ import streamRouter from './routes/stream';
 import spotifyRouter from './routes/spotify';
 import lyricsRouter from './routes/lyrics';
 import playerRouter from './routes/player';
+import deezerRouter from './routes/deezer';
+import radioRouter from './routes/radio';
 import { LavalinkManager } from 'lavalink-client';
 import { requireFirebaseAuth, verifyFirebaseIdToken } from './lib/firebaseAuth';
 import { registerJamHandlers } from './sockets/jam';
@@ -241,9 +243,31 @@ app.get('/health', async (_req, res) => {
   });
 });
 
+app.get('/api/jam/info/:id', async (req, res) => {
+  const partyId = req.params.id.toUpperCase();
+  const roomId = `party:${partyId}`;
+  try {
+    const partyDataStr = await redis.get(roomId);
+    if (partyDataStr) {
+      const partyData = typeof partyDataStr === 'string' ? JSON.parse(partyDataStr) : partyDataStr;
+      return res.json({
+        ok: true,
+        hostName: partyData.hostName || 'Host',
+        currentTrack: partyData.currentTrack || null,
+        isPlaying: partyData.isPlaying || false
+      });
+    }
+    return res.status(404).json({ ok: false, error: 'Party not found' });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: 'Internal server error' });
+  }
+});
+
 app.use('/api', streamRouter);
 app.use('/api/spotify', privateRateLimit, spotifyRouter);
 app.use('/api/lyrics', requireFirebaseAuth, privateRateLimit, lyricsRouter);
+app.use('/api/deezer', privateRateLimit, deezerRouter);
+app.use('/api/radio', privateRateLimit, radioRouter);
 app.use('/api', privateRateLimit, playerRouter);
 
 app.get('/api/search', requireFirebaseAuth, privateRateLimit, async (req, res) => {
@@ -578,9 +602,11 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-  console.log(`Audio Backend running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, () => {
+    console.log(`Audio Backend running on port ${PORT}`);
+  });
+}
 
 // Graceful shutdown
 function gracefulShutdown(signal: string) {

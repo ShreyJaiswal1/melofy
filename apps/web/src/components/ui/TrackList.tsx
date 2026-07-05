@@ -11,6 +11,7 @@ import { app } from '@/lib/firebase/config';
 import { mapTrackItemToPlayerTrack } from '@/lib/track-mappers';
 import { useLikedSongs } from '@/hooks/useLikedSongs';
 import type { TrackItem } from '@/lib/track-types';
+import Link from 'next/link';
 
 export type { TrackItem };
 
@@ -239,9 +240,13 @@ export function TrackList({ tracks, showHeader = true }: TrackListProps) {
                 >
                   {item.title}
                 </span>
-                <span className='text-xs text-muted-foreground truncate font-outfit'>
+                <Link
+                  href={`/artist/${encodeURIComponent(item.artist)}`}
+                  className='text-xs text-muted-foreground truncate font-outfit hover:underline hover:text-primary transition-colors cursor-pointer'
+                  onClick={(e) => e.stopPropagation()}
+                >
                   {item.artist}
-                </span>
+                </Link>
               </div>
             </div>
 

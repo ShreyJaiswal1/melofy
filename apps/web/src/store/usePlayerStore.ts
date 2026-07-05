@@ -67,7 +67,7 @@ interface PlayerState {
   toggleShuffle: () => void;
   toggleRepeat: () => void;
   setLyrics: (id: string, lyrics: LyricsData) => void;
-  updateTrackUrl: (id: string, url: string, identifier?: string, duration?: number) => void;
+  updateTrackUrl: (id: string, url: string, identifier?: string, duration?: number, artworkUrl?: string) => void;
   hydrateState: (state: Partial<PlayerState>) => void;
   setPlaying: (isPlaying: boolean) => void;
   reset: () => void;
@@ -285,7 +285,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     set((state) => ({
       lyricsCache: { ...state.lyricsCache, [id]: lyrics },
     })),
-  updateTrackUrl: (id, url, identifier, duration) =>
+  updateTrackUrl: (id, url, identifier, duration, artworkUrl) =>
     set((state) => {
       const nextCurrentTrack =
         state.currentTrack && state.currentTrack.id === id
@@ -294,6 +294,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
               url,
               identifier: identifier || state.currentTrack.identifier,
               duration: duration || state.currentTrack.duration,
+              artworkUrl: artworkUrl || state.currentTrack.artworkUrl,
             }
           : state.currentTrack;
 
@@ -310,6 +311,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
           url,
           identifier: identifier || nextQueue[queueIndex].identifier,
           duration: duration || nextQueue[queueIndex].duration,
+          artworkUrl: artworkUrl || nextQueue[queueIndex].artworkUrl,
         };
       }
 
